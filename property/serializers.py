@@ -1,4 +1,4 @@
-from .models import CustomUser,Review, Property, Review,MaintenanceRequest, TenantApplication
+from .models import CustomUser,Review, Myhome ,Property, Review,MaintenanceRequest, TenantApplication
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
@@ -40,3 +40,10 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         # Add custom claims to the response
         data['role'] = self.user.role  # Assuming your user model has a `role` field
         return data
+    
+class MyHomeSerializer(serializers.ModelSerializer):
+    property = PropertySerializer(read_only=True)  # Use nested serializer for property details
+    tenant = CustomUserSerializer(read_only=True)
+    class Meta:
+        model = Myhome
+        fields = ['id','property','tenant']

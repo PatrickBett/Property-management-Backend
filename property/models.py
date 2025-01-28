@@ -77,4 +77,10 @@ class TenantApplication(models.Model):
     def __str__(self):
         return self.status
 
-    
+
+class Myhome(models.Model):
+    tenant = models.OneToOneField(CustomUser, on_delete=models.CASCADE, null=True,limit_choices_to={"role": "tenant"})
+    property = models.OneToOneField(Property, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'Home for {self.tenant} at {self.property.title}'

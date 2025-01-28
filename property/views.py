@@ -3,11 +3,17 @@ from rest_framework import generics, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
-
-from .models import Property, CustomUser, Review, MaintenanceRequest, TenantApplication
+import stripe
+from django.conf import settings
+from django.http import JsonResponse
+import json
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from django.views.decorators.csrf import csrf_exempt
+from .models import Property, CustomUser, Myhome ,Review, MaintenanceRequest, TenantApplication
 from .serializers import (
     PropertySerializer,
     CustomUserSerializer,
+    MyHomeSerializer,
     ReviewSerializer,
     MaintenanceRequestSerializer,
     TenantApplicationSerializer, 
@@ -89,3 +95,51 @@ class LandlordDashboardView(generics.GenericAPIView):
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
+
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
+@csrf_exempt
+def create_payment_intent(request):
+    """
+    Create a PaymentIntent for Stripe payments.
+    """
+    if request.method == "POST":
+        try:
+            # Parse the JSON body
+            data = json.loads(request.body)
+            amount = data.get("amount")  # Get the 'amount' from the request body
+
+            if not amount or amount <= 0:
+                return JsonResponse({"error": "Invalid amount"}, status=400)
+
+            # Create a PaymentIntent
+            intent = stripe.PaymentIntent.create(
+                amount=amount,  # Amount in cents
+                currency="usd",
+                payment_method_types=["card"],
+            )
+
+            return JsonResponse({"clientSecret": intent["client_secret"]})
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+        
+class MyHomeListCreateView(ListCreateAPIView):
+    """
+    Handles listing all MyHome objects and creating a new one.
+    Supports optional filtering by tenant_id using query parameters.
+    """
+    serializer_class = MyHomeSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # Filter homes by the authenticated tenant
+        return Myhome.objects.filter(tenant=self.request.user)
+
+
+class MyHomeRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
+    """
+    Handles retrieving, updating, and deleting a specific MyHome object.
+    """
+    queryset = Myhome.objects.all()
+    serializer_class = MyHomeSerializer       
