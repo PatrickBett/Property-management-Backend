@@ -12,6 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Property, CustomUser, Myhome ,Review, MaintenanceRequest, TenantApplication
 from .serializers import (
     PropertySerializer,
+    MyPropertySerializer,
     CustomUserSerializer,
     MyHomeSerializer,
     ReviewSerializer,
@@ -143,3 +144,14 @@ class MyHomeRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     """
     queryset = Myhome.objects.all()
     serializer_class = MyHomeSerializer       
+
+
+
+class MyPropertyListCreateView(ListCreateAPIView):
+
+    serializer_class = MyPropertySerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # Filter property by the authenticated landlord
+        return Property.objects.filter(landlord=self.request.user)

@@ -12,6 +12,7 @@ class CustomUser(AbstractUser):
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
 
+
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
 
@@ -21,7 +22,8 @@ class Category(models.Model):
 
 
 class Property(models.Model):
-    landlord = models.ForeignKey(CustomUser, on_delete=models.CASCADE, limit_choices_to={'role':'landlord'})
+    landlord = models.ForeignKey(CustomUser, on_delete=models.CASCADE, limit_choices_to={'role':'landlord'},related_name='properties_as_landlord')
+    tenant = models.ForeignKey(CustomUser, on_delete=models.CASCADE, limit_choices_to={'role':'tenant'}, null=True , blank= True, related_name='properties_as_tenant')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
     title = models.CharField(max_length=255)
     description = models.TextField()
@@ -84,3 +86,11 @@ class Myhome(models.Model):
 
     def __str__(self):
         return f'Home for {self.tenant} at {self.property.title}'
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE , null=True)
+    profile = models.URLField(null=True, blank=True, 
+        default="https://banner2.cleanpng.com/20180419/ute/avfy9wfv6.webp" )
+    def __str__(self):
+        return f'Profile for {self.user}'

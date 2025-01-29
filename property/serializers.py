@@ -1,8 +1,15 @@
-from .models import CustomUser,Review, Myhome ,Property, Review,MaintenanceRequest, TenantApplication
+from .models import CustomUser,Review,Profile , Myhome, Category ,Property, Review,MaintenanceRequest, TenantApplication
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = '__all__' 
+
+
 class CustomUserSerializer(serializers.ModelSerializer):
+    profile = ProfileSerializer(read_only = True)
     class Meta:
         model = CustomUser
         fields = '__all__'
@@ -11,8 +18,14 @@ class CustomUserSerializer(serializers.ModelSerializer):
         user = CustomUser.objects.create_user(**validated_data)
         return user
 
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = '__all__'
         
 class PropertySerializer(serializers.ModelSerializer):
+    category = CategorySerializer(read_only = True)
+    landlord = CustomUserSerializer(read_only=True)
     class Meta:
         model = Property
         fields = '__all__'
@@ -47,3 +60,10 @@ class MyHomeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Myhome
         fields = ['id','property','tenant']
+
+class MyPropertySerializer(serializers.ModelSerializer):
+    landlord = CustomUserSerializer(read_only=True)
+    tenant = CustomUserSerializer(read_only=True)
+    class Meta:
+        model = Property
+        fields = '__all__'

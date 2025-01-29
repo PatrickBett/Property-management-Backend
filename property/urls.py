@@ -1,4 +1,4 @@
-from .views import PropertyListView, PropertyDestroyView, PropertyUpdateView, CustomUserViewSet, CustomTokenObtainPairView, MyHomeListCreateView, MyHomeRetrieveUpdateDestroyView
+from .views import PropertyListView, PropertyDestroyView, PropertyUpdateView, CustomUserViewSet, CustomTokenObtainPairView, MyHomeListCreateView, MyHomeRetrieveUpdateDestroyView, MyPropertyListCreateView
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import create_payment_intent
@@ -14,4 +14,5 @@ urlpatterns = [
     path('login/', CustomTokenObtainPairView.as_view(), name = 'login'),
     path('properties/<int:pk>/update/', PropertyUpdateView.as_view(), name = 'updateproperty'),
     path("create-payment-intent/", create_payment_intent, name="create_payment_intent"),
+    path('myproperties/', MyPropertyListCreateView.as_view(), name = 'myproperties'),
 ]
