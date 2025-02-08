@@ -58,7 +58,7 @@ class MaintenanceRequest(models.Model):
     tenant = models.ForeignKey(CustomUser, on_delete=models.CASCADE, limit_choices_to={"role":"tenant"})
     property = models.ForeignKey(Property, on_delete= models.CASCADE)
     request = models.TextField(max_length=1000)
-    status = models.CharField( max_length=20, choices=status_choices)
+    status = models.CharField( max_length=20, choices=status_choices, default= 'submitted')
 
     def __str__(self):
         return self.request

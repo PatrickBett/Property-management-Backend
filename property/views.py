@@ -27,7 +27,7 @@ from .serializers import (
 class CustomUserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
-    # permission_classes = [IsAuthenticated]
+    
 
     def get_queryset(self):
         # Filter by role if a query parameter is provided
@@ -35,27 +35,33 @@ class CustomUserViewSet(viewsets.ModelViewSet):
         if role:
             return CustomUser.objects.filter(role=role)
         return CustomUser.objects.all()
+# View to retrieve a certain user 
+class CustomUserListView(generics.RetrieveAPIView):
+    serializer_class=CustomUserSerializer
+    permission_classes =[IsAuthenticated]
 
+    def get_object(self):
+        return self.request.user
 
 # Property Views
 class PropertyListView(generics.ListCreateAPIView):
     queryset = Property.objects.all()
     serializer_class = PropertySerializer
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
 
 class PropertyDestroyView(generics.DestroyAPIView):
     queryset = Property.objects.all()
     serializer_class = PropertySerializer
     lookup_field = 'pk'
-    # permission_classes = [IsAuthenticated]  # Only landlords can delete properties
+    permission_classes = [IsAuthenticated]  # Only landlords can delete properties
 
 
 class PropertyUpdateView(generics.UpdateAPIView):
     queryset = Property.objects.all()
     serializer_class = PropertySerializer
     lookup_field = 'pk'
-    # permission_classes = [IsAuthenticated]  # Only landlords can update properties
+    permission_classes = [IsAuthenticated]  # Only landlords can update properties
 
     def get_object(self):
         return super().get_object()
@@ -63,7 +69,7 @@ class PropertyUpdateView(generics.UpdateAPIView):
 
 # Tenant Dashboard View
 class TenantDashboardView(generics.GenericAPIView):
-    # permission_classes = [IsAuthenticated]  # Custom permission for tenants
+    permission_classes = [IsAuthenticated]  # Custom permission for tenants
 
     def get(self, request, *args, **kwargs):
         user = request.user
@@ -143,7 +149,8 @@ class MyHomeRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     Handles retrieving, updating, and deleting a specific MyHome object.
     """
     queryset = Myhome.objects.all()
-    serializer_class = MyHomeSerializer       
+    serializer_class = MyHomeSerializer 
+    permission_classes = [IsAuthenticated]      
 
 
 
@@ -155,3 +162,27 @@ class MyPropertyListCreateView(ListCreateAPIView):
     def get_queryset(self):
         # Filter property by the authenticated landlord
         return Property.objects.filter(landlord=self.request.user)
+    
+
+class MaintenanceRequestCreateListView(generics.ListCreateAPIView):
+    """
+    API view to list all maintenance requests and allow tenants to create new requests.
+    """
+    queryset = MaintenanceRequest.objects.all()
+    serializer_class = MaintenanceRequestSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """
+        Ensure tenants can only see their own maintenance requests.
+        """
+        user = self.request.user
+        if user.role == "tenant":
+            return MaintenanceRequest.objects.filter(tenant=user)
+        return MaintenanceRequest.objects.none()  # Return an empty queryset for non-tenants
+
+    def perform_create(self, serializer):
+        """
+        Automatically set the tenant field to the logged-in user when creating a request.
+        """
+        serializer.save(tenant=self.request.user)

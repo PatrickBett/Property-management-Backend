@@ -36,6 +36,8 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class MaintenanceRequestSerializer(serializers.ModelSerializer):
+    property = PropertySerializer(read_only = True)
+    tenant = CustomUserSerializer(read_only = True)
     class Meta:
         model = MaintenanceRequest
         fields = '__all__'
