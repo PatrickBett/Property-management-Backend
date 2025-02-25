@@ -4,12 +4,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 import stripe
+from rest_framework import serializers
+
 from django.conf import settings
 from django.http import JsonResponse
 import json
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from django.views.decorators.csrf import csrf_exempt
-from .models import Property, CustomUser, Myhome ,Review, MaintenanceRequest, TenantApplication
+from .models import Property,Category ,CustomUser, Myhome ,Review, MaintenanceRequest, TenantApplication
 from .serializers import (
     PropertySerializer,
     MyPropertySerializer,
@@ -18,6 +20,7 @@ from .serializers import (
     ReviewSerializer,
     MaintenanceRequestSerializer,
     TenantApplicationSerializer, 
+    CategorySerializer,
     CustomTokenObtainPairSerializer
 )
 # from .permissions import IsTenant, IsLandlord  # Assuming you have custom permissions
@@ -42,12 +45,30 @@ class CustomUserListView(generics.RetrieveAPIView):
 
     def get_object(self):
         return self.request.user
+# Categories
+class CategoryListCreateView(generics.ListCreateAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [IsAuthenticated]
+
 
 # Property Views
 class PropertyListView(generics.ListCreateAPIView):
     queryset = Property.objects.all()
     serializer_class = PropertySerializer
     permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        category_id = self.request.data.get("category")  # Get category from request data
+        category = None
+        if category_id:
+            try:
+                category = Category.objects.get(id=category_id)  # Fetch the category instance
+            except Category.DoesNotExist:
+                raise serializers.ValidationError({"category": "Invalid category ID"})
+
+        serializer.save(landlord=self.request.user, category=category)
+
 
 
 class PropertyDestroyView(generics.DestroyAPIView):

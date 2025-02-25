@@ -19,6 +19,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
         return user
 
 class CategorySerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = Category
         fields = '__all__'
