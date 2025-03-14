@@ -1,4 +1,4 @@
-from .models import CustomUser,Review,Profile , Myhome, Category ,Property, Review,MaintenanceRequest, TenantApplication
+from .models import CustomUser,Review,Profile , Myhome, Category ,Property, Review,MaintenanceRequest, TenantApplication, Payment
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
@@ -70,3 +70,9 @@ class MyPropertySerializer(serializers.ModelSerializer):
     class Meta:
         model = Property
         fields = '__all__'
+
+class PaymentSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Payment
+        fields = ['amount', 'currency', 'stripe_payment_id', 'property', 'tenant']

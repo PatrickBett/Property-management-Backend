@@ -1,17 +1,24 @@
 from django.shortcuts import render
 from rest_framework import generics, viewsets
+from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 import stripe
 from rest_framework import serializers
+from django.shortcuts import get_object_or_404
 
 from django.conf import settings
 from django.http import JsonResponse
 import json
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from django.views.decorators.csrf import csrf_exempt
-from .models import Property,Category ,CustomUser, Myhome ,Review, MaintenanceRequest, TenantApplication
+from .models import (Property,Category ,
+                     CustomUser, Myhome ,
+                     Review, MaintenanceRequest, 
+                     TenantApplication,
+                     Payment)
+
 from .serializers import (
     PropertySerializer,
     MyPropertySerializer,
@@ -21,7 +28,8 @@ from .serializers import (
     MaintenanceRequestSerializer,
     TenantApplicationSerializer, 
     CategorySerializer,
-    CustomTokenObtainPairSerializer
+    CustomTokenObtainPairSerializer,
+    PaymentSerializer
 )
 # from .permissions import IsTenant, IsLandlord  # Assuming you have custom permissions
 
@@ -125,32 +133,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 
 
-stripe.api_key = settings.STRIPE_SECRET_KEY
 
-@csrf_exempt
-def create_payment_intent(request):
-    """
-    Create a PaymentIntent for Stripe payments.
-    """
-    if request.method == "POST":
-        try:
-            # Parse the JSON body
-            data = json.loads(request.body)
-            amount = data.get("amount")  # Get the 'amount' from the request body
-
-            if not amount or amount <= 0:
-                return JsonResponse({"error": "Invalid amount"}, status=400)
-
-            # Create a PaymentIntent
-            intent = stripe.PaymentIntent.create(
-                amount=amount,  # Amount in cents
-                currency="usd",
-                payment_method_types=["card"],
-            )
-
-            return JsonResponse({"clientSecret": intent["client_secret"]})
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=400)
         
 class MyHomeListCreateView(ListCreateAPIView):
     """
@@ -207,3 +190,69 @@ class MaintenanceRequestCreateListView(generics.ListCreateAPIView):
         Automatically set the tenant field to the logged-in user when creating a request.
         """
         serializer.save(tenant=self.request.user)
+
+# Payment listing view
+class PaymentListView(generics.ListAPIView):
+    serializer_class = PaymentSerializer
+    queryset= Payment.objects.all()
+
+
+
+
+# Create Payment Intent for stripe payments
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
+class CreatePaymentIntentView(APIView):
+    def post(self,request):
+        amount = request.data.get("amount")
+        currency = request.data.get("currency")
+        property_id = request.data.get("property_id")
+        # property = get_object_or_404(Property, id=property_id)
+        tenant = self.request.user
+
+        # Fetch the property instance using Property.objects.get(id=property_id)
+        try:
+            # property = Property.objects.get(id=property_id)
+            property = get_object_or_404(Property, id=property_id)
+        except Property.DoesNotExist:
+            return Response({'error': 'Property not found'}, status=404)
+
+# basic validations
+        
+        if not currency:
+            return Response({'error':'Currency is required'}, status=400)
+
+        try:
+            intent = stripe.PaymentIntent.create(
+                amount = int(float(request.data.get("amount"))*100),
+                currency=currency
+            )
+
+            # save to the database
+
+            payment_data = {
+                'amount': amount,
+                'currency': currency,
+                'stripe_payment_id': intent['id'],
+                'property':property.id,
+                'tenant':tenant.id              
+            }
+            print(payment_data)
+            serializer = PaymentSerializer(data=payment_data)
+            if serializer.is_valid():
+
+                serializer.save(tenant=tenant,property=property)
+                return Response(
+                    {
+                        'clientSecret':intent['client_secret'],
+                        'payment': serializer.data,
+                    },
+                )
+            
+            return Response(serializer.errors)
+
+
+        except stripe.error.StripeError as e:
+            return Response({
+                'error': str(e)
+            })
