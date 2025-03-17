@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Property,CustomUser, Category, Review, MaintenanceRequest, TenantApplication ,Myhome, Profile, Payment
+from .models import Property,Messages,CustomUser, Category, Review, MaintenanceRequest, TenantApplication ,Myhome, Profile, Payment
 
 # Register your models here.
 admin.site.register(CustomUser)
@@ -11,3 +11,4 @@ admin.site.register(Profile)
 admin.site.register(Payment)
 admin.site.register(MaintenanceRequest)
 admin.site.register(TenantApplication)
+admin.site.register(Messages)

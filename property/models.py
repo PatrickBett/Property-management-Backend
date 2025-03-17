@@ -81,7 +81,8 @@ class TenantApplication(models.Model):
 
 
 class Myhome(models.Model):
-    tenant = models.OneToOneField(CustomUser, on_delete=models.CASCADE, null=True,limit_choices_to={"role": "tenant"})
+    tenant = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, limit_choices_to={"role": "tenant"})#THIS ALLOWS ONE USER TO HAVE MULTIPLE HOMES
+    # tenant = models.OneToOneField(CustomUser, on_delete=models.CASCADE, null=True,limit_choices_to={"role": "tenant"})
     property = models.OneToOneField(Property, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -105,3 +106,10 @@ class Payment(models.Model):
     
     def __str__(self):
         return f'{self.stripe_payment_id}  Amount = ${self.amount}'
+    
+
+class Messages(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE , null=True)
+    message = models.TextField(max_length=1000, null=True, blank=True)
+    def __str__(self):
+        return f'Message for {self.user}'

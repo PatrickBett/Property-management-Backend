@@ -16,6 +16,9 @@ class CustomUserSerializer(serializers.ModelSerializer):
         extra_kwargs = {"password":{"write_only":True}}
     def create(self, validated_data):
         user = CustomUser.objects.create_user(**validated_data)
+        
+        # Ensure Profile is not duplicated
+        profile, created = Profile.objects.get_or_create(user=user)
         return user
 
 class CategorySerializer(serializers.ModelSerializer):

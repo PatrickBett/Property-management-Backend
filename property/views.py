@@ -17,6 +17,7 @@ from .models import (Property,Category ,
                      CustomUser, Myhome ,
                      Review, MaintenanceRequest, 
                      TenantApplication,
+                     Profile,
                      Payment)
 
 from .serializers import (
@@ -166,6 +167,18 @@ class MyPropertyListCreateView(ListCreateAPIView):
     def get_queryset(self):
         # Filter property by the authenticated landlord
         return Property.objects.filter(landlord=self.request.user)
+
+
+class PropertyUpdateView(generics.UpdateAPIView):
+    queryset = Property.objects.all()
+    serializer_class = PropertySerializer
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.is_available = False
+        instance.tenant = CustomUser.objects.get(id=request.data['tenant_id'])
+        instance.save()
+        return Response({"message": "Property updated successfully"})
     
 
 class MaintenanceRequestCreateListView(generics.ListCreateAPIView):
@@ -210,10 +223,12 @@ class CreatePaymentIntentView(APIView):
         # property = get_object_or_404(Property, id=property_id)
         tenant = self.request.user
 
+
         # Fetch the property instance using Property.objects.get(id=property_id)
         try:
             # property = Property.objects.get(id=property_id)
             property = get_object_or_404(Property, id=property_id)
+            
         except Property.DoesNotExist:
             return Response({'error': 'Property not found'}, status=404)
 
@@ -225,7 +240,10 @@ class CreatePaymentIntentView(APIView):
         try:
             intent = stripe.PaymentIntent.create(
                 amount = int(float(request.data.get("amount"))*100),
-                currency=currency
+                currency=currency,
+                metadata={
+                'property_id': property.id,  # Adding property.id as metadata
+    }
             )
 
             # save to the database
@@ -237,11 +255,28 @@ class CreatePaymentIntentView(APIView):
                 'property':property.id,
                 'tenant':tenant.id              
             }
-            print(payment_data)
+            print("INTENT  METADATA",intent.metadata.property_id)
+            
             serializer = PaymentSerializer(data=payment_data)
+
             if serializer.is_valid():
 
                 serializer.save(tenant=tenant,property=property)
+                # payment_confirmation = stripe.PaymentIntent.retrieve(intent["id"])
+                
+                # property.is_available = False
+                # property.tenant = tenant
+                # property.save()
+                # myhome = Myhome.objects.create(property=property, tenant=tenant)
+
+                # if payment_confirmation.status == "succeeded":
+                    
+                #     property.is_available = False
+                #     property.tenant = tenant
+                #     property.save()
+                #     myhome = Myhome.objects.create(property=property, tenant=tenant)
+
+                
                 return Response(
                     {
                         'clientSecret':intent['client_secret'],
@@ -256,3 +291,22 @@ class CreatePaymentIntentView(APIView):
             return Response({
                 'error': str(e)
             })
+
+
+class FinalyzePayment(APIView):
+    def post(self,request):
+        payment_intent_id = request.data.get("paymentIntentId")
+        property_id = request.data.get("property_id")
+        property = get_object_or_404(Property, id=property_id)
+        paymentConfirmation = stripe.PaymentIntent.retrieve(payment_intent_id)
+
+        if paymentConfirmation.status == "succeeded":
+            property.is_available = False
+            property.tenant = self.request.user
+            property.save()
+            Myhome.objects.create(property=property, tenant=self.request.user)
+
+        return Response({'message': 'Payment successful and property updated'})
+
+
+    
