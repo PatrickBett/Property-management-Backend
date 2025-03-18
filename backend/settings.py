@@ -121,7 +121,8 @@ AUTH_USER_MODEL = 'property.CustomUser'  # Adjust the app name if it's different
 
 CORS_ORIGIN_WHITELIST = [
    
-     'http://localhost:5173'
+     'http://localhost:5173',
+     'https://property-management-ui-seven.vercel.app/'
      
 ]
 
