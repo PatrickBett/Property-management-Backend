@@ -255,7 +255,7 @@ class CreatePaymentIntentView(APIView):
                 'property':property.id,
                 'tenant':tenant.id              
             }
-            print("INTENT  METADATA",intent.metadata.property_id)
+            
             
             serializer = PaymentSerializer(data=payment_data)
 
@@ -309,4 +309,41 @@ class FinalyzePayment(APIView):
         return Response({'message': 'Payment successful and property updated'})
 
 
+    
+# Review View
+class ReviewPostView(APIView):
+    
+    def post(self,request):
+        name = request.user
+        property_id = request.data.get("property_id")
+        content = request.data.get("content")
+
+        # Validate property
+        property_instance = get_object_or_404(Property, id=property_id)
+
+        has_lived_there = Myhome.objects.filter(tenant=name, property=property_instance).exists()
+
+        if not has_lived_there:
+            return Response({"error": "You can only review properties you have stayed in."})
+   
+        review = Review.objects.create(name=name,property=property_instance,content=content)
+        # Serialize the review
+        serializer = ReviewSerializer(review)
+        return Response(serializer.data)
+    
+    def get(self,request):
+
+        property_id = request.query_params.get("property_id")  # Get property_id from query params
+        
+        if not property_id:
+            return Response({"error":"Property Id not passed"})
+            
+
+        # Get the property instance
+        property_instance = get_object_or_404(Property, id=property_id)
+
+        reviews = Review.objects.filter(property=property_instance)
+
+        serializer = ReviewSerializer(reviews, many=True)
+        return Response(serializer.data, status=200)
     

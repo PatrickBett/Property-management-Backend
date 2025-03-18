@@ -1,4 +1,9 @@
-from .models import CustomUser,Review,Profile , Myhome, Category ,Property, Review,MaintenanceRequest, TenantApplication, Payment
+from .models import (
+    CustomUser,Review,
+    Profile , Myhome, Category ,
+    Property, Review,MaintenanceRequest, 
+    TenantApplication, Payment)
+
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
@@ -35,6 +40,8 @@ class PropertySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ReviewSerializer(serializers.ModelSerializer):
+    property = PropertySerializer(read_only = True)
+    
     class Meta:
         model = Review
         fields = '__all__'
