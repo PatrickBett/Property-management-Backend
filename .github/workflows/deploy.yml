@@ -3,35 +3,38 @@ name: Deploy to PythonAnywhere
 on:
   push:
     branches:
-      - main  # Trigger deployment on push to the main branch
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Set up Python environment
       - name: Set up Python 3.9
         uses: actions/setup-python@v3
         with:
           python-version: '3.9'
-
-      # Step 3: Install dependencies from requirements.txt
+          
       - name: Install dependencies
         run: |
           python -m venv venv
           source venv/bin/activate
           pip install -r requirements.txt
 
-      # Step 4: Deploy to PythonAnywhere.
-      - name: Deploy to PythonAnywhere
+      - name: Update code on PythonAnywhere
+        env:
+          PA_USER: ${{ secrets.PYTHONANYWHERE_USER }}
+          PA_PASS: ${{ secrets.PYTHONANYWHERE_PASSWORD }}
+        run: |
+          pip install fabric
+          python -c "from fabric import Connection; c = Connection('$PA_USER.pythonanywhere.com', user='$PA_USER', connect_kwargs={'password': '$PA_PASS'}); c.run('cd ~/spbproperty && git pull')"
+
+      - name: Reload PythonAnywhere Web App
         env:
           API_KEY: ${{ secrets.PYTHONANYWHERE_API_KEY }}
         run: |
           curl -X POST "https://www.pythonanywhere.com/api/v0/user/spbproperty/webapps/spbproperty.pythonanywhere.com/reload/" \
           -H "Authorization: Token $API_KEY"
-
