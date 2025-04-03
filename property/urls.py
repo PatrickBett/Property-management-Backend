@@ -6,7 +6,9 @@ from .views import  (CategoryListCreateView,
                      PaymentListView,
                      CreatePaymentIntentView,
                      PropertyUpdateView,FinalyzePayment,
-                     ReviewPostView)
+                     ReviewPostView,PaymentHistoryView,
+                     PropertyImageUploadView,
+                     )
 router = DefaultRouter()
 router.register(r'users', CustomUserViewSet, basename='user')
 
@@ -27,4 +29,6 @@ urlpatterns = [
     path('create-payment-intent/', CreatePaymentIntentView.as_view(), name = 'create-payment-intent'),
     path('finalyze-payment/', FinalyzePayment.as_view(), name = 'finalyze-payment'),
     path('post-review/', ReviewPostView.as_view(), name = 'reviewpost'),
+    path('payment-history/', PaymentHistoryView.as_view(), name = 'payment-history'),
+    path("upload-images/", PropertyImageUploadView.as_view(), name="property-image-upload"),
 ]

@@ -2,6 +2,7 @@ from .models import (
     CustomUser,Review,
     Profile , Myhome, Category ,
     Property, Review,MaintenanceRequest, 
+    PropertyImage,
     TenantApplication, Payment)
 
 from rest_framework import serializers
@@ -31,13 +32,24 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = '__all__'
+
+class PropertyImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PropertyImage
+        fields = '__all__'
+
+
         
 class PropertySerializer(serializers.ModelSerializer):
+
     category = CategorySerializer(read_only = True)
     landlord = CustomUserSerializer(read_only=True)
+    images = PropertyImageSerializer(many=True, read_only=True)
+    
     class Meta:
         model = Property
         fields = '__all__'
+
 
 class ReviewSerializer(serializers.ModelSerializer):
     property = PropertySerializer(read_only = True)
@@ -82,7 +94,8 @@ class MyPropertySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class PaymentSerializer(serializers.ModelSerializer):
+    property = PropertySerializer(read_only=True)
     
     class Meta:
         model = Payment
-        fields = ['amount', 'currency', 'stripe_payment_id', 'property', 'tenant']
+        fields = ['amount', 'currency', 'stripe_payment_id', 'property', 'tenant','created_at','status']

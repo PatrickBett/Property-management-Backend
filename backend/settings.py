@@ -1,6 +1,7 @@
 
 from pathlib import Path
-
+import os
+from django.conf import settings
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -106,6 +107,11 @@ USE_I18N = True
 USE_TZ = True
 
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
@@ -122,7 +128,8 @@ AUTH_USER_MODEL = 'property.CustomUser'  # Adjust the app name if it's different
 CORS_ORIGIN_WHITELIST = [
    
      'http://localhost:5173',
-     'https://property-management-ui-seven.vercel.app/'
+     'https://property-management-ui-seven.vercel.app',
+     'https://propertysite2.netlify.app'
      
 ]
 

@@ -1,13 +1,15 @@
 from django.shortcuts import render
 from rest_framework import generics, viewsets
 from rest_framework.views import APIView
+import base64
+from django.core.files.base import ContentFile
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 import stripe
 from rest_framework import serializers
 from django.shortcuts import get_object_or_404
-
+from rest_framework.parsers import MultiPartParser, FormParser
 from django.conf import settings
 from django.http import JsonResponse
 import json
@@ -17,7 +19,7 @@ from .models import (Property,Category ,
                      CustomUser, Myhome ,
                      Review, MaintenanceRequest, 
                      TenantApplication,
-                     Profile,
+                     Profile,PropertyImage,
                      Payment)
 
 from .serializers import (
@@ -68,6 +70,15 @@ class PropertyListView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
+
+        print("FILES RECEIVED:", self.request.FILES)  # Debugging output
+        images = self.request.FILES.getlist("images")  # Ensure this returns a list
+        print("IMAGES:", images)  # Debugging output
+
+        if not images:
+            raise serializers.ValidationError({"images": "No images received."})
+
+
         category_id = self.request.data.get("category")  # Get category from request data
         category = None
         if category_id:
@@ -76,7 +87,13 @@ class PropertyListView(generics.ListCreateAPIView):
             except Category.DoesNotExist:
                 raise serializers.ValidationError({"category": "Invalid category ID"})
 
-        serializer.save(landlord=self.request.user, category=category)
+        property_instance =serializer.save(landlord=self.request.user, category=category)
+        # Handle multiple images
+        images = self.request.FILES.getlist('images')
+        for image in images:
+            
+            PropertyImage.objects.create(property=property_instance, image=image)
+            
 
 
 
@@ -155,7 +172,10 @@ class MyHomeRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     """
     queryset = Myhome.objects.all()
     serializer_class = MyHomeSerializer 
-    permission_classes = [IsAuthenticated]      
+    permission_classes = [IsAuthenticated]
+
+    
+
 
 
 
@@ -195,14 +215,29 @@ class MaintenanceRequestCreateListView(generics.ListCreateAPIView):
         """
         user = self.request.user
         if user.role == "tenant":
-            return MaintenanceRequest.objects.filter(tenant=user)
+            property = Myhome.objects.get(tenant=user)
+            # serializer.save(tenant=user, property=home.property)
+            return MaintenanceRequest.objects.filter(tenant=user, property=property)
         return MaintenanceRequest.objects.none()  # Return an empty queryset for non-tenants
 
     def perform_create(self, serializer):
-        """
-        Automatically set the tenant field to the logged-in user when creating a request.
-        """
-        serializer.save(tenant=self.request.user)
+
+        user = self.request.user
+
+        # Get the property ID from the request
+        property_id = self.request.data.get('property')
+
+        home = Property.objects.get(tenant=user, id=property_id)
+        serializer.save(tenant=user, property = home)
+
+    def get(self,request):
+        user = self.request.user
+        if user.role == "tenant":
+            maintenance_requests = MaintenanceRequest.objects.filter(tenant=user)
+            serializer = MaintenanceRequestSerializer(maintenance_requests, many=True)
+            return Response(serializer.data)
+       
+        return Response({"message": "You do not have permission to view this data."})
 
 # Payment listing view
 class PaymentListView(generics.ListAPIView):
@@ -299,14 +334,33 @@ class FinalyzePayment(APIView):
         property_id = request.data.get("property_id")
         property = get_object_or_404(Property, id=property_id)
         paymentConfirmation = stripe.PaymentIntent.retrieve(payment_intent_id)
+        stripepaymentintentobject = Payment.objects.filter(stripe_payment_id=paymentConfirmation.id).first()
 
         if paymentConfirmation.status == "succeeded":
+            
             property.is_available = False
             property.tenant = self.request.user
+            
             property.save()
             Myhome.objects.create(property=property, tenant=self.request.user)
+            stripepaymentintentobject.status = 'succeeded'
+            stripepaymentintentobject.save()
 
-        return Response({'message': 'Payment successful and property updated'})
+        elif paymentConfirmation.status == "null":
+            
+            stripepaymentintentobject.status = 'failed'
+            stripepaymentintentobject.save()
+
+        else:
+            stripepaymentintentobject.status = 'pending'
+            stripepaymentintentobject.save()
+
+        
+
+        return Response({
+            'message': 'Payment successful and property updated',
+            'paymentDetails': paymentConfirmation  # Include the payment details here
+            })
 
 
     
@@ -346,4 +400,34 @@ class ReviewPostView(APIView):
 
         serializer = ReviewSerializer(reviews, many=True)
         return Response(serializer.data, status=200)
-    
+
+# Payment View
+class PaymentHistoryView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self,request):
+        tenant = request.user.id
+        payments = Payment.objects.filter(tenant=tenant)
+        # Serialize the payment data
+        serializer = PaymentSerializer(payments,many=True)
+        print(serializer.data)
+
+        return Response(serializer.data)
+
+
+class PropertyImageUploadView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request):
+        property_id = request.data.get("property")
+        images = request.FILES.getlist("images")
+
+        if not property_id or not images:
+            return Response({"error": "Property ID and images are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        property_instance = Property.objects.get(id=property_id)
+
+        for image in images:
+            PropertyImage.objects.create(property=property_instance, image=image)
+
+        return Response({"message": "Images uploaded successfully"})

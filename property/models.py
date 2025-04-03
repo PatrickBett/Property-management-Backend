@@ -33,11 +33,21 @@ class Property(models.Model):
     zip_code = models.CharField(max_length=10)
     rent_amount = models.DecimalField(max_digits=10, decimal_places=2)
     is_available = models.BooleanField(default=True)
-    url = models.URLField(blank=True, null=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.title
+    
+class PropertyImage(models.Model):
+    property = models.ForeignKey(
+        Property, on_delete=models.CASCADE, related_name="images"
+    )
+    image = models.ImageField(upload_to="media", blank=True, null=True)
+
+    def __str__(self):
+        return f"Image for {self.property.title}"
+
 
 class Review(models.Model):
     name = models.ForeignKey(CustomUser, on_delete=models.CASCADE, limit_choices_to={"role":"tenant"})
@@ -46,7 +56,17 @@ class Review(models.Model):
 
     def __str__(self):
         return f'Review by {self.name} for {self.property}'
-    
+
+
+class Myhome(models.Model):
+    tenant = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, limit_choices_to={"role": "tenant"})#THIS ALLOWS ONE USER TO HAVE MULTIPLE HOMES
+    # tenant = models.OneToOneField(CustomUser, on_delete=models.CASCADE, null=True,limit_choices_to={"role": "tenant"})
+    property = models.OneToOneField(Property, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'Home for {self.tenant} at {self.property.title}'
+
+ 
 class MaintenanceRequest(models.Model):
 
     status_choices = (
@@ -80,14 +100,6 @@ class TenantApplication(models.Model):
         return self.status
 
 
-class Myhome(models.Model):
-    tenant = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, limit_choices_to={"role": "tenant"})#THIS ALLOWS ONE USER TO HAVE MULTIPLE HOMES
-    # tenant = models.OneToOneField(CustomUser, on_delete=models.CASCADE, null=True,limit_choices_to={"role": "tenant"})
-    property = models.OneToOneField(Property, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f'Home for {self.tenant} at {self.property.title}'
-
 
 class Profile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE , null=True)
@@ -103,7 +115,13 @@ class Payment(models.Model):
     stripe_payment_id = models.CharField(max_length=255, blank=True, null=True)
     property = models.ForeignKey(Property, on_delete=models.CASCADE)
     tenant = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    status = models.CharField(max_length=20, null=True,choices=[
+        ('pending', 'Pending'),
+        ('succeeded', 'Succeeded'),
+        ('failed', 'Failed')
+    ])
     def __str__(self):
         return f'{self.stripe_payment_id}  Amount = ${self.amount}'
     
