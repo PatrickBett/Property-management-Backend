@@ -36,7 +36,7 @@ jobs:
       
       - name: Pull latest code from GitHub on PythonAnywhere
         run: |
-          ssh -o StrictHostKeyChecking=no spbproperty@spbproperty.pythonanywhere.com "cd ~/Property-management-Backend && git pull"
+          ssh -o StrictHostKeyChecking=no spbproperty@ssh.pythonanywhere.com "cd ~/Property-management-Backend && git pull"
         
 
       - name: Reload Web App on PythonAnywhere
