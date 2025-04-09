@@ -24,14 +24,14 @@ jobs:
           source venv/bin/activate
           pip install -r requirements.txt
 
-      - name: Set up SSH
+      - name: Set up SSH for GitHub
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.PA_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan ${PA_HOST} >> ~/.ssh/known_hosts
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
         env:
-          PA_HOST: spbproperty.pythonanywhere.com
+          GH_SSH_PRIVATE_KEY: ${{ secrets.PA_SSH_PRIVATE_KEY }}
 
       - name: Pull latest code from GitHub on PythonAnywhere
         run: |
