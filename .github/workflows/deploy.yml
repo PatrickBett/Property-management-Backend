@@ -24,14 +24,20 @@ jobs:
           source venv/bin/activate
           pip install -r requirements.txt
 
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan pythonanywhere.com >> ~/.ssh/known_hosts
+
       - name: SSH and Pull on PythonAnywhere
         env:
           PA_USER: ${{ secrets.PYTHONANYWHERE_USER }}
-          PA_PASS: ${{ secrets.PYTHONANYWHERE_PASSWORD }}
         run: |
           pip install fabric
           echo "from fabric import Connection; \
-                c = Connection(host='${PA_USER}.pythonanywhere.com', user='${PA_USER}', connect_kwargs={'password': '${PA_PASS}'}); \
+                c = Connection(host='${PA_USER}.pythonanywhere.com', user='${PA_USER}', connect_kwargs={'key_filename': '~/.ssh/id_rsa'}); \
                 c.run('cd ~/spbproperty && git pull')" > deploy.py
           python deploy.py
 
