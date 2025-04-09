@@ -33,7 +33,7 @@ nosetests.xml
 pytest*.xml
 *.cover
 
-# Ignore the Django static files folder (if generated locally)
+# Ignore the Django staticc files folder (if generated locally)
 static/
 
 # Ignore Django media files folder (if media is stored locally)
