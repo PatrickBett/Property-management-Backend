@@ -25,9 +25,10 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan ${{ secrets.PYTHONANYWHERE_USER }}.pythonanywhere.com >> ~/.ssh/known_hosts
 
-      - name: Pull latest code on PythonAnywhere
+      - name: SSH into PythonAnywhere and pull latest code
         run: |
-          ssh ${{ secrets.PYTHONANYWHERE_USER }}@${{ secrets.PYTHONANYWHERE_USER }}.pythonanywhere.com "cd ~/spbproperty && git pull"
+          ssh ${{ secrets.PYTHONANYWHERE_USER }}@${{ secrets.PYTHONANYWHERE_USER }}.pythonanywhere.com \
+          "cd ~/Property-management-Backend && git pull"
 
       - name: Reload Web App on PythonAnywhere
         env:
