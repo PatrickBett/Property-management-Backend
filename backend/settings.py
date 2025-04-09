@@ -113,10 +113,10 @@ USE_I18N = True
 USE_TZ = True
 
 
-# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# MEDIA_URL = "/media/"
-# MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
@@ -159,28 +159,4 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Set this to a folder insi
 
 
 
-# # # For Static Files
-# # AWS_STORAGE_BUCKET_NAME = 'djangoproperty-staticfiles'
-# AWS_ACCESS_KEY_ID = AWS_ACCESS_KEY_ID
-# AWS_SECRET_ACCESS_KEY = AWS_SECRET_ACCESS_KEY
-# # AWS_S3_REGION_NAME =os.getenv('AWS_S3_REGION_NAME')  
-# # AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 
-# # STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-# # STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
-
-# # For Media Files
-# AWS_STORAGE_BUCKET_NAME_MEDIA = 'django-property-mediafiles'  # Separate variable for media
-# DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-# AWS_S3_CUSTOM_DOMAIN_MEDIA = f'{AWS_STORAGE_BUCKET_NAME_MEDIA}.s3.amazonaws.com'
-# MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN_MEDIA}/'
-AWS_ACCESS_KEY_ID = 'AKIAW4UXNNFMFXGYLPQW'
-AWS_SECRET_ACCESS_KEY = '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'
-AWS_STORAGE_BUCKET_NAME = 'propertys3'
-AWS_S3_SIGNATURE_NAME = 's3v4'
-AWS_S3_REGION_NAME = 'us-east-2'
-AWS_S3_FILE_OVERWRITE = False
-AWS_DEFAULT_ACL =  None
-AWS_S3_VERIFY = True
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/'
