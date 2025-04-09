@@ -18,22 +18,28 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Set up SSH key
+      - name: Install dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+
+      - name: Set up SSH
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.PA_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan ${{ secrets.PYTHONANYWHERE_USER }}.pythonanywhere.com >> ~/.ssh/known_hosts
+          ssh-keyscan ${PA_HOST} >> ~/.ssh/known_hosts
+        env:
+          PA_HOST: spbproperty.pythonanywhere.com
 
-      - name: SSH into PythonAnywhere and pull latest code
+      - name: Pull latest code from GitHub on PythonAnywhere
         run: |
-          ssh ${{ secrets.PYTHONANYWHERE_USER }}@${{ secrets.PYTHONANYWHERE_USER }}.pythonanywhere.com \
-          "cd ~/Property-management-Backend && git pull"
+          ssh spbproperty@spbproperty.pythonanywhere.com "cd ~/Property-management-Backend && git pull"
 
       - name: Reload Web App on PythonAnywhere
         env:
-          PA_USER: ${{ secrets.PYTHONANYWHERE_USER }}
           API_KEY: ${{ secrets.PYTHONANYWHERE_API_KEY }}
         run: |
-          curl -X POST "https://www.pythonanywhere.com/api/v0/user/${PA_USER}/webapps/${PA_USER}.pythonanywhere.com/reload/" \
-          -H "Authorization: Token ${API_KEY}"
+          curl -X POST "https://www.pythonanywhere.com/api/v0/user/spbproperty/webapps/spbproperty.pythonanywhere.com/reload/" \
+          -H "Authorization: Token $API_KEY"
