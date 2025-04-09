@@ -1,9 +1,14 @@
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
 from django.conf import settings
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv()  # Load .env variables
+
+
 
 
 # Quick-start development settings - unsuitable for production
@@ -15,7 +20,7 @@ SECRET_KEY = 'django-insecure-v%3yz96r4#8&@&i5ngs^je+(4-@2=8cpz_08#tr!(t3n(=2q59
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['spbproperty.pythonanywhere.com','127.0.0.1']
+ALLOWED_HOSTS = ['spbproperty.pythonanywhere.com','0.0.0.0', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -31,6 +36,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
+    'storages',
 ]
 
 MIDDLEWARE = [
@@ -107,10 +113,10 @@ USE_I18N = True
 USE_TZ = True
 
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-MEDIA_URL = "/media/"
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+# MEDIA_URL = "/media/"
+# MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
@@ -146,3 +152,35 @@ REST_FRAMEWORK = {
 # Stripe Keys
 STRIPE_SECRET_KEY = "sk_test_51OeBjFF11zjK1PObcZa5BrJzbpgIpLpW9RyRkrlHFdDdVGbOnx1FcyPzYbtbZHp94vc6dqIYbdcVDsPTy2wvnMxO00j7O8Rl4G"
 STRIPE_PUBLISHABLE_KEY = "pk_test_51OeBjFF11zjK1PObRcOLVS4OiagIrRa6TnECSaI7lrMkV59jyBDEkyLpNaz63nHJKcL7JLNmhUXTYN5oNm0cAqxX00i3WBd2FG"
+
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Set this to a folder inside your project
+
+
+
+
+# # # For Static Files
+# # AWS_STORAGE_BUCKET_NAME = 'djangoproperty-staticfiles'
+# AWS_ACCESS_KEY_ID = AWS_ACCESS_KEY_ID
+# AWS_SECRET_ACCESS_KEY = AWS_SECRET_ACCESS_KEY
+# # AWS_S3_REGION_NAME =os.getenv('AWS_S3_REGION_NAME')  
+# # AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+
+# # STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+# # STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
+
+# # For Media Files
+# AWS_STORAGE_BUCKET_NAME_MEDIA = 'django-property-mediafiles'  # Separate variable for media
+# DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+# AWS_S3_CUSTOM_DOMAIN_MEDIA = f'{AWS_STORAGE_BUCKET_NAME_MEDIA}.s3.amazonaws.com'
+# MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN_MEDIA}/'
+AWS_ACCESS_KEY_ID = 'AKIAW4UXNNFMFXGYLPQW'
+AWS_SECRET_ACCESS_KEY = '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'
+AWS_STORAGE_BUCKET_NAME = 'propertys3'
+AWS_S3_SIGNATURE_NAME = 's3v4'
+AWS_S3_REGION_NAME = 'us-east-2'
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL =  None
+AWS_S3_VERIFY = True
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/'

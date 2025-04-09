@@ -17,24 +17,28 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: '3.9'
-          
+
       - name: Install dependencies
         run: |
           python -m venv venv
           source venv/bin/activate
           pip install -r requirements.txt
 
-      - name: Update code on PythonAnywhere
+      - name: SSH and Pull on PythonAnywhere
         env:
           PA_USER: ${{ secrets.PYTHONANYWHERE_USER }}
           PA_PASS: ${{ secrets.PYTHONANYWHERE_PASSWORD }}
         run: |
           pip install fabric
-          python -c "from fabric import Connection; c = Connection('$PA_USER.pythonanywhere.com', user='$PA_USER', connect_kwargs={'password': '$PA_PASS'}); c.run('cd ~/spbproperty && git pull')"
+          echo "from fabric import Connection; \
+                c = Connection(host='${PA_USER}.pythonanywhere.com', user='${PA_USER}', connect_kwargs={'password': '${PA_PASS}'}); \
+                c.run('cd ~/spbproperty && git pull')" > deploy.py
+          python deploy.py
 
-      - name: Reload PythonAnywhere Web App
+      - name: Reload Web App on PythonAnywhere
         env:
+          PA_USER: ${{ secrets.PYTHONANYWHERE_USER }}
           API_KEY: ${{ secrets.PYTHONANYWHERE_API_KEY }}
         run: |
-          curl -X POST "https://www.pythonanywhere.com/api/v0/user/spbproperty/webapps/spbproperty.pythonanywhere.com/reload/" \
-          -H "Authorization: Token $API_KEY"
+          curl -X POST "https://www.pythonanywhere.com/api/v0/user/${PA_USER}/webapps/${PA_USER}.pythonanywhere.com/reload/" \
+          -H "Authorization: Token ${API_KEY}"

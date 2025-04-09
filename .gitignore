@@ -1,0 +1,49 @@
+# 1️⃣ Python-related
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.env  # Ignore .env file containing secrets
+.env.local
+*.sqlite3  # Ignore SQLite database
+
+# 2️⃣ Django-related
+/db.sqlite3  # SQLite DB (if used for local dev)
+/media/  # User-uploaded files (optional)
+/staticfiles/  # Collected static files
+
+# 3️⃣ Virtual Environment (venv)
+venv/
+env/
+*.venv
+
+# 4️⃣ Docker-related
+*.log
+docker-compose.override.yml
+.dockerignore
+*.pid
+__docker_cache__/
+.env.docker  # If using a separate .env for Docker
+
+# 5️⃣ Git / IDE / Editor Files
+.git/
+*.swp
+*~
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# 6️⃣ Node.js (If frontend included)
+node_modules/
+npm-debug.log
+yarn.lock
+
+# 7️⃣ Build/CI/CD Artifacts
+*.bak
+*.log
+*.out
+*.pid
+coverage/
+htmlcov/
+instance/

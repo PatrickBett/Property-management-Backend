@@ -13,6 +13,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from django.conf import settings
 from django.http import JsonResponse
 import json
+from .utils import upload_file_to_s3
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from django.views.decorators.csrf import csrf_exempt
 from .models import (Property,Category ,
@@ -91,7 +92,11 @@ class PropertyListView(generics.ListCreateAPIView):
         # Handle multiple images
         images = self.request.FILES.getlist('images')
         for image in images:
-            
+            # You can optionally use boto3 here
+            key = f"property-images/{image}"
+            upload_file_to_s3(image, settings.AWS_STORAGE_BUCKET_NAME, key)
+
+            # Create the PropertyImage instance
             PropertyImage.objects.create(property=property_instance, image=image)
             
 
