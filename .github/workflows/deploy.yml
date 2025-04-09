@@ -33,16 +33,10 @@ jobs:
         env:
           PA_SSH_PRIVATE_KEY: ${{ secrets.PA_SSH_PRIVATE_KEY }}
 
-      - name: Set up SSH for PythonAnywhere
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan spbproperty.pythonanywhere.com >> ~/.ssh/known_hosts
-        env:
-          PA_HOST: spbproperty.pythonanywhere.com
-
       - name: Pull latest code from GitHub on PythonAnywhere
         run: |
           ssh spbproperty@spbproperty.pythonanywhere.com "cd ~/Property-management-Backend && git pull"
+          ssh-keyscan spbproperty.pythonanywhere.com >> ~/.ssh/known_hosts  # Add PythonAnywhere to known hosts
 
       - name: Reload Web App on PythonAnywhere
         env:
