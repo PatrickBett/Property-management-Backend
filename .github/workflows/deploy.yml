@@ -35,8 +35,9 @@ jobs:
 
       - name: Pull latest code from GitHub on PythonAnywhere
         run: |
-          ssh spbproperty@spbproperty.pythonanywhere.com "cd ~/Property-management-Backend && git pull"
-
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no spbproperty@spbproperty.pythonanywhere.com \
+          "cd ~/Property-management-Backend && git pull"
+        
       - name: Reload Web App on PythonAnywhere
         env:
           API_KEY: ${{ secrets.PYTHONANYWHERE_API_KEY }}
