@@ -1,50 +1,40 @@
-# 1️⃣ Python-related
-__pycache__/
+# Ignore Python bytecode files
 *.pyc
 *.pyo
-*.pyd
-*.env  # Ignore .env file containing secrets
-.env.local
-*.sqlite3  # Ignore SQLite database
+__pycache__/
 
-# 2️⃣ Django-related
-/db.sqlite3  # SQLite DB (if used for local dev)
-/media/  # User-uploaded files (optional)
-/staticfiles/  # Collected static files
-
-# 3️⃣ Virtual Environment (venv)
+# Ignore virtual environments (commonly named 'venv' or '.venv')
 venv/
-env/
-*.venv
+.venv/
+
+# Ignore Django migrations
+*/migrations/*
+
+# Ignore SQLite database files
+*.sqlite3
+
+# Ignore log files
+*.log
+
+# Ignore environment variable files (e.g., .env containing sensitive info like SECRET_KEY)
 .env
 
-# 4️⃣ Docker-related
-*.log
-docker-compose.override.yml
-.dockerignore
-*.pid
-__docker_cache__/
-.env.docker  # If using a separate .env for Docker
-
-# 5️⃣ Git / IDE / Editor Files
-.git/
-*.swp
-*~
+# Ignore IDE/editor settings (VS Code, PyCharm, etc.)
 .vscode/
 .idea/
+
+# Ignore OS-specific files (macOS, Windows)
 .DS_Store
 Thumbs.db
 
-# 6️⃣ Node.js (If frontend included)
-node_modules/
-npm-debug.log
-yarn.lock
+# Ignore coverage and testing reports
+.coverage
+nosetests.xml
+pytest*.xml
+*.cover
 
-# 7️⃣ Build/CI/CD Artifacts
-*.bak
-*.log
-*.out
-*.pid
-coverage/
-htmlcov/
-instance/
+# Ignore the Django static files folder (if generated locally)
+static/
+
+# Ignore Django media files folder (if media is stored locally)
+media/
