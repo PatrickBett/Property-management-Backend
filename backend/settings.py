@@ -150,9 +150,11 @@ REST_FRAMEWORK = {
 
 
 # Stripe Keys
+STRIPE_SECRET_KEY = "sk_test_51OeBjFF11zjK1PObcZa5BrJzbpgIpLpW9RyRkrlHFdDdVGbOnx1FcyPzYbtbZHp94vc6dqIYbdcVDsPTy2wvnMxO00j7O8Rl4G"
+STRIPE_PUBLISHABLE_KEY = "pk_test_51OeBjFF11zjK1PObRcOLVS4OiagIrRa6TnECSaI7lrMkV59jyBDEkyLpNaz63nHJKcL7JLNmhUXTYN5oNm0cAqxX00i3WBd2FG"
 
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Sett this to a folder inside your project
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Set this to a folder inside your project
 
 
 
