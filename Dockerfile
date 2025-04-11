@@ -1,6 +1,4 @@
 FROM python:3.9-slim
-RUN apt-get update && \
-    apt-get install -y default-libmysqlclient-dev build-essential
 
 # Set the working directory to /app
 WORKDIR /app
