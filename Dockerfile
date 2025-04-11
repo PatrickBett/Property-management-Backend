@@ -17,4 +17,4 @@ ENV PYTHONUNBUFFERED=1
 EXPOSE 8000
 
 # Collect static files
-CMD ["bash", "-c", "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn --bind 0.0.0.0:8000 backend.wsgi:application"]
+CMD ["bash", "-c", "python manage.py makemigrations && python manage.py migrate && python manage.py collectstatic --noinput && gunicorn --bind 0.0.0.0:8000 backend.wsgi:application"]
