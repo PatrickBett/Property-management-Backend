@@ -36,7 +36,8 @@ from .serializers import (
     PaymentSerializer
 )
 # from .permissions import IsTenant, IsLandlord  # Assuming you have custom permissions
-
+def home(request):
+    return JsonResponse({"message": "Welcome to the homepage!"})
 
 # CustomUser ViewSet
 class CustomUserViewSet(viewsets.ModelViewSet):

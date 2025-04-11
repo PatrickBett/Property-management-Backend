@@ -7,12 +7,13 @@ from .views import  (CategoryListCreateView,
                      CreatePaymentIntentView,
                      PropertyUpdateView,FinalyzePayment,
                      ReviewPostView,PaymentHistoryView,
-                     PropertyImageUploadView,
+                     PropertyImageUploadView,home
                      )
 router = DefaultRouter()
 router.register(r'users', CustomUserViewSet, basename='user')
 
 urlpatterns = [
+    path('', home, name='home'),
     path('api-auth/', include(router.urls)),
     path('account/', CustomUserListView.as_view(), name = 'account'),
     path('properties/', PropertyListView.as_view(), name = 'properties'),
