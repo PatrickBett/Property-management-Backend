@@ -25,4 +25,6 @@ stripe==11.5.0
 typing_extensions==4.12.2
 urllib3
 
+psycopg2-binary
+dj-database-url
 
