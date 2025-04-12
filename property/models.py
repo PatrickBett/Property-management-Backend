@@ -127,9 +127,3 @@ class Payment(models.Model):
     def __str__(self):
         return f'{self.stripe_payment_id}  Amount = ${self.amount}'
     
-
-class Messages(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE , null=True)
-    message = models.TextField(max_length=1000, null=True, blank=True)
-    def __str__(self):
-        return f'Message for {self.user}'
