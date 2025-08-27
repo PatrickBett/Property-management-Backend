@@ -92,10 +92,10 @@ DATABASES = {
 # }
 
 # Render Postgress (Live)
-import dj_database_url
-DATABASES = {
-    'default':dj_database_url.parse('postgresql://db_property_user:smGz3iyUbNhSpmTrvrdS31nJm3kEO4ul@dpg-cvsho56r433s73c7uru0-a.oregon-postgres.render.com/db_property')
-}
+# import dj_database_url
+# DATABASES = {
+#     'default':dj_database_url.parse('postgresql://db_property_user:smGz3iyUbNhSpmTrvrdS31nJm3kEO4ul@dpg-cvsho56r433s73c7uru0-a.oregon-postgres.render.com/db_property')
+# }
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
